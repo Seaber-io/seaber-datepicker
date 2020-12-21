@@ -13,22 +13,15 @@ import subDays from "date-fns/subDays";
 import subWeeks from "date-fns/subWeeks";
 import subMonths from "date-fns/subMonths";
 import subYears from "date-fns/subYears";
-import getSeconds from "date-fns/getSeconds";
-import getMinutes from "date-fns/getMinutes";
-import getHours from "date-fns/getHours";
-import getDay from "date-fns/getDay";
-import getDate from "date-fns/getDate";
+
 import dfgetWeek from "date-fns/getWeek";
-import getMonth from "date-fns/getMonth";
+
 import getQuarter from "date-fns/getQuarter";
-import getYear from "date-fns/getYear";
-import getTime from "date-fns/getTime";
+
 import setSeconds from "date-fns/setSeconds";
-import setMinutes from "date-fns/setMinutes";
-import setHours from "date-fns/setHours";
-import setMonth from "date-fns/setMonth";
+
 import setQuarter from "date-fns/setQuarter";
-import setYear from "date-fns/setYear";
+
 import min from "date-fns/min";
 import max from "date-fns/max";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
@@ -55,6 +48,7 @@ import toDate from "date-fns/toDate";
 import parse from "date-fns/parse";
 import parseISO from "date-fns/parseISO";
 import longFormatters from "date-fns/esm/_lib/format/longFormatters";
+import { Temporal } from 'proposal-temporal';
 
 export const DEFAULT_YEAR_ITEM_NUMBER = 12;
 
@@ -164,7 +158,7 @@ export function safeDateFormat(date, { dateFormat, locale }) {
       formatDate(
         date,
         Array.isArray(dateFormat) ? dateFormat[0] : dateFormat,
-        (locale: locale)
+        (locale)
       )) ||
     ""
   );
@@ -176,9 +170,45 @@ export function setTime(date, { hour = 0, minute = 0, second = 0 }) {
   return setHours(setMinutes(setSeconds(date, second), minute), hour);
 }
 
-export { setMinutes, setHours, setMonth, setQuarter, setYear };
 
 // ** Date Getters **
+
+
+const _convTemp = (date, timeZone = 'UTC') => {
+  return new Temporal.ZonedDateTime((date.getTime()*1000000), timeZone)
+}
+
+export function getSeconds(date, timeZone) {
+  return _convTemp(date, timezone).second;
+}
+
+export function getMinutes(date, timeZone) {
+  return _convTemp(date, timezone).minute;
+}
+
+export function getHours(date, timeZone) {
+  return _convTemp(date, timezone).hour;
+}
+
+export function getMonth(date, timeZone) {
+  return _convTemp(date, timezone).month;
+}
+
+export function getYear(date, timeZone) {
+  return _convTemp(date, timezone).year;
+}
+
+export function getDay(date, timeZone) {
+  return _convTemp(date, timezone).dayOfWeek;
+}
+
+export function getDate(date, timeZone) {
+  return _convTemp(date, timezone).day;
+}
+
+export function getTime(date, timeZone) {
+  return _convTemp(date, timezone).epochMilliseconds;
+}
 
 // getDay Returns day of week, getDate returns day of month
 export {
@@ -193,6 +223,24 @@ export {
   getTime
 };
 
+export function setMinutes(date, minutes, timeZone) {
+  return new Date(_convTemp(date.setMinutes(minutes), timezone).epochMilliseconds);
+}
+
+export function setHours(date, hours, timeZone) {
+  return new Date(_convTemp(date.setHours(hours), timezone).epochMilliseconds);
+}
+
+export function setMonth(date, month, timeZone) {
+  return new Date(_convTemp(date.setMonth(month), timezone).epochMilliseconds);
+}
+
+export function setYear(date, year, timeZone) {
+  return new Date(_convTemp(date.setYear(year), timezone).epochMilliseconds);
+}
+
+export { setMinutes, setHours, setMonth, setQuarter, setYear };
+
 export function getWeek(date, locale) {
   let localeObj =
     (locale && getLocaleObject(locale)) ||
@@ -201,13 +249,13 @@ export function getWeek(date, locale) {
 }
 
 export function getDayOfWeekCode(day, locale) {
-  return formatDate(day, "ddd", (locale: locale));
+  return formatDate(day, "ddd", (locale));
 }
 
 // *** Start of ***
 
-export function getStartOfDay(date) {
-  return startOfDay(date);
+export function getStartOfDay(date, timezone) {
+  return new Date((new Temporal.ZonedDateTime((date.getTime()*1000000), timeZone)).startOfDay().epochMilliseconds);
 }
 
 export function getStartOfWeek(date, locale) {
