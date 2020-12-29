@@ -14,8 +14,6 @@ import subWeeks from "date-fns/subWeeks";
 import subMonths from "date-fns/subMonths";
 import subYears from "date-fns/subYears";
 
-import dfgetWeek from "date-fns/getWeek";
-
 import getQuarter from "date-fns/getQuarter";
 
 import setSeconds from "date-fns/setSeconds";
@@ -58,16 +56,24 @@ var longFormattingTokensRegExp = /P+p+|P+|p+|''|'(''|[^'])+('|$)|./g;
 
 // ** Date Constructors **
 
-export function newDate(value) {
+function _parseISO(value, timeZone = 'UTC') {
+ return new Date( Temporal.Instant.from(parseISO(value)).toZonedDateTimeISO(timeZone).epochMilliseconds )
+}
+
+function _toDate(value, timeZone = 'UTC') {
+  return new Date( Temporal.Instant.from(toDate(value)).toZonedDateTimeISO(timeZone).epochMilliseconds )
+}
+
+export function newDate(value, timeZone = 'UTC') {
   const d = value
     ? typeof value === "string" || value instanceof String
-      ? parseISO(value)
-      : toDate(value)
+      ? _parseISO(value, timeZone = 'UTC')
+      : _toDate(value, timeZone = 'UTC')
     : new Date();
   return isValid(d) ? d : null;
 }
 
-export function parseDate(value, dateFormat, locale, strictParsing) {
+export function parseDate(value, dateFormat, locale, strictParsing, timeZone = 'UTC') {
   let parsedDate = null;
   let localeObject = getLocaleObject(locale) || getDefaultLocale();
   let strictParsingValueMatch = true;
@@ -83,7 +89,7 @@ export function parseDate(value, dateFormat, locale, strictParsing) {
         parsedDate = tryParseDate;
       }
     });
-    return parsedDate;
+    return new Date(Temporal.ZonedDateTime((parsedDate.getTime*1000000), timeZone).epochMilliseconds);
   }
 
   parsedDate = parse(value, dateFormat, new Date(), { locale: localeObject });
@@ -116,7 +122,7 @@ export function parseDate(value, dateFormat, locale, strictParsing) {
     }
   }
 
-  return isValid(parsedDate) && strictParsingValueMatch ? parsedDate : null;
+  return isValid(parsedDate) && strictParsingValueMatch ? new Date(Temporal.ZonedDateTime((parsedDate.getTime*1000000), timeZone).epochMilliseconds) : null;
 }
 
 // ** Date "Reflection" **
@@ -166,8 +172,11 @@ export function safeDateFormat(date, { dateFormat, locale }) {
 
 // ** Date Setters **
 
-export function setTime(date, { hour = 0, minute = 0, second = 0 }) {
-  return setHours(setMinutes(setSeconds(date, second), minute), hour);
+export function setTime(date, { hour = 0, minute = 0, second = 0, timeZone = 'UTC', day, year, month }) {
+  day = (day) ? day : getDay(date, timeZone);
+  month = (month) ? month : getMonth(date, timeZone);
+  year = (year) ? year : getYear(date, timeZone);
+  return Temporal.ZonedDateTime.from({ timeZone, year, month, day, hour, minute, second }, { overflow: 'constrain' });
 }
 
 
@@ -210,42 +219,26 @@ export function getTime(date, timeZone) {
   return _convTemp(date, timezone).epochMilliseconds;
 }
 
-// getDay Returns day of week, getDate returns day of month
-export {
-  getSeconds,
-  getMinutes,
-  getHours,
-  getMonth,
-  getQuarter,
-  getYear,
-  getDay,
-  getDate,
-  getTime
-};
-
-export function setMinutes(date, minutes, timeZone) {
+export function setMinutes(date, minutes, timezone) {
   return new Date(_convTemp(date.setMinutes(minutes), timezone).epochMilliseconds);
 }
 
-export function setHours(date, hours, timeZone) {
+export function setHours(date, hours, timezone) {
   return new Date(_convTemp(date.setHours(hours), timezone).epochMilliseconds);
 }
 
-export function setMonth(date, month, timeZone) {
+export function setMonth(date, month, timezone) {
   return new Date(_convTemp(date.setMonth(month), timezone).epochMilliseconds);
 }
 
-export function setYear(date, year, timeZone) {
+export function setYear(date, year, timezone) {
   return new Date(_convTemp(date.setYear(year), timezone).epochMilliseconds);
 }
 
-export { setMinutes, setHours, setMonth, setQuarter, setYear };
+export { getQuarter, setQuarter, setSeconds };
 
-export function getWeek(date, locale) {
-  let localeObj =
-    (locale && getLocaleObject(locale)) ||
-    (getDefaultLocale() && getLocaleObject(getDefaultLocale()));
-  return dfgetWeek(date, localeObj ? { locale: localeObj } : null);
+export function getWeek(date, timezone) {
+  return _convTemp(date, timezone).weekOfYear;
 }
 
 export function getDayOfWeekCode(day, locale) {
@@ -255,7 +248,7 @@ export function getDayOfWeekCode(day, locale) {
 // *** Start of ***
 
 export function getStartOfDay(date, timezone) {
-  return new Date((new Temporal.ZonedDateTime((date.getTime()*1000000), timeZone)).startOfDay().epochMilliseconds);
+  return new Date((new Temporal.ZonedDateTime((date.getTime()*1000000), timezone)).startOfDay().epochMilliseconds);
 }
 
 export function getStartOfWeek(date, locale) {
