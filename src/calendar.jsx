@@ -64,6 +64,7 @@ export default class Calendar extends React.Component {
       monthSelectedIn: 0,
       forceShowMonthNavigation: false,
       timeCaption: "Time",
+      timeZone: 'UTC',
       previousYearButtonLabel: "Previous Year",
       nextYearButtonLabel: "Next Year",
       previousMonthButtonLabel: "Previous Month",
@@ -134,6 +135,8 @@ export default class Calendar extends React.Component {
     excludeTimes: PropTypes.array,
     filterTime: PropTypes.func,
     timeCaption: PropTypes.string,
+    timeZone: PropTypes.string,
+    setTimeZone: PropTypes.func,
     openToDate: PropTypes.instanceOf(Date),
     peekNextMonth: PropTypes.bool,
     previousMonthAriaLabel: PropTypes.string,
@@ -578,7 +581,7 @@ export default class Calendar extends React.Component {
     }
     return (
       <div className={classes.join(" ")}>
-        {formatDate(date, this.props.dateFormat, this.props.locale)}
+        {formatDate(date, this.props.dateFormat, this.props.locale, this.props.timeZone)}
       </div>
     );
   };
@@ -591,6 +594,7 @@ export default class Calendar extends React.Component {
       <YearDropdown
         adjustDateOnChange={this.props.adjustDateOnChange}
         date={this.state.date}
+        timeZone={this.props.timeZone}
         onSelect={this.props.onSelect}
         setOpen={this.props.setOpen}
         dropdownMode={this.props.dropdownMode}
@@ -611,6 +615,7 @@ export default class Calendar extends React.Component {
     return (
       <MonthDropdown
         dropdownMode={this.props.dropdownMode}
+        timeZone={this.props.timeZone}
         locale={this.props.locale}
         onChange={this.changeMonth}
         month={getMonth(this.state.date)}
@@ -626,6 +631,7 @@ export default class Calendar extends React.Component {
     return (
       <MonthYearDropdown
         dropdownMode={this.props.dropdownMode}
+        timeZone={this.props.timeZone}
         locale={this.props.locale}
         dateFormat={this.props.dateFormat}
         onChange={this.changeMonthYear}
@@ -644,7 +650,7 @@ export default class Calendar extends React.Component {
     return (
       <div
         className="react-datepicker__today-button"
-        onClick={e => this.props.onSelect(getStartOfToday(), e)}
+        onClick={e => this.props.onSelect(getStartOfToday(new Date(), this.props.timeZone), e)}
       >
         {this.props.todayButton}
       </div>
@@ -782,6 +788,7 @@ export default class Calendar extends React.Component {
             weekAriaLabelPrefix={this.props.weekAriaLabelPrefix}
             onChange={this.changeMonthYear}
             day={monthDate}
+            timeZone={this.props.timeZone}
             dayClassName={this.props.dayClassName}
             monthClassName={this.props.monthClassName}
             onDayClick={this.handleDayClick}
@@ -845,6 +852,7 @@ export default class Calendar extends React.Component {
           <Year
             onDayClick={this.handleDayClick}
             date={this.state.date}
+            timeZone={this.props.timeZone}
             {...this.props}
           />
         </div>
@@ -864,6 +872,7 @@ export default class Calendar extends React.Component {
           onChange={this.props.onTimeChange}
           timeClassName={this.props.timeClassName}
           format={this.props.timeFormat}
+          timeZone={this.props.timeZone}
           includeTimes={this.props.includeTimes}
           intervals={this.props.timeIntervals}
           minTime={this.props.minTime}
@@ -895,6 +904,7 @@ export default class Calendar extends React.Component {
       return (
         <InputTime
           date={time}
+          timeZone={this.props.timeZone}
           timeString={timeString}
           timeInputLabel={this.props.timeInputLabel}
           onChange={this.props.onTimeChange}

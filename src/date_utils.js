@@ -1,6 +1,6 @@
 import isDate from "date-fns/isDate";
 import isValidDate from "date-fns/isValid";
-import format from "date-fns/format";
+import format from "date-fns-tz/format";
 import addMinutes from "date-fns/addMinutes";
 import addHours from "date-fns/addHours";
 import addDays from "date-fns/addDays";
@@ -83,7 +83,7 @@ export function parseDate(value, dateFormat, locale, strictParsing, timeZone = '
       if (strictParsing) {
         strictParsingValueMatch =
           isValid(tryParseDate) &&
-          value === format(tryParseDate, df, { awareOfUnicodeTokens: true });
+          value === format(tryParseDate, df, { awareOfUnicodeTokens: true, timeZone });
       }
       if (isValid(tryParseDate) && strictParsingValueMatch) {
         parsedDate = tryParseDate;
@@ -97,7 +97,7 @@ export function parseDate(value, dateFormat, locale, strictParsing, timeZone = '
   if (strictParsing) {
     strictParsingValueMatch =
       isValid(parsedDate) &&
-      value === format(parsedDate, dateFormat, { awareOfUnicodeTokens: true });
+      value === format(parsedDate, dateFormat, { awareOfUnicodeTokens: true, timeZone });
   } else if (!isValid(parsedDate)) {
     dateFormat = dateFormat
       .match(longFormattingTokensRegExp)
@@ -135,9 +135,11 @@ export function isValid(date) {
 
 // ** Date Formatting **
 
-export function formatDate(date, formatStr, locale) {
+
+
+export function formatDate(date, formatStr, locale, timeZone) {
   if (locale === "en") {
-    return format(date, formatStr, { awareOfUnicodeTokens: true });
+    return format(date, formatStr, { awareOfUnicodeTokens: true, timeZone });
   }
   let localeObj = getLocaleObject(locale);
   if (locale && !localeObj) {
@@ -154,7 +156,8 @@ export function formatDate(date, formatStr, locale) {
   }
   return format(date, formatStr, {
     locale: localeObj ? localeObj : null,
-    awareOfUnicodeTokens: true
+    awareOfUnicodeTokens: true,
+    timeZone
   });
 }
 

@@ -65,6 +65,7 @@ export default class DatePicker extends React.Component {
     return {
       allowSameDay: false,
       dateFormat: "MM/dd/yyyy",
+      timeZone: 'UTC',
       dateFormatCalendar: "LLLL yyyy",
       onChange() {},
       disabled: false,
@@ -125,6 +126,7 @@ export default class DatePicker extends React.Component {
     ariaRequired: PropTypes.string,
     autoComplete: PropTypes.string,
     autoFocus: PropTypes.bool,
+    timeZone: ProprTypes.string,
     calendarClassName: PropTypes.string,
     calendarContainer: PropTypes.func,
     children: PropTypes.node,
@@ -331,6 +333,7 @@ export default class DatePicker extends React.Component {
     return {
       open: this.props.startOpen || false,
       preventFocus: false,
+      timeZone: this.props.timeZone,
       preSelection: this.props.selected
         ? this.props.selected
         : boundedPreSelection,
@@ -811,6 +814,8 @@ export default class DatePicker extends React.Component {
         weekAriaLabelPrefix={this.props.weekAriaLabelPrefix}
         adjustDateOnChange={this.props.adjustDateOnChange}
         setOpen={this.setOpen}
+        timeZone={this.state.timeZone}
+        setTimeZone={timeZone => this.setState({timeZone})}
         shouldCloseOnSelect={this.props.shouldCloseOnSelect}
         dateFormat={this.props.dateFormatCalendar}
         useWeekdaysShort={this.props.useWeekdaysShort}
