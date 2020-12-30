@@ -191,57 +191,57 @@ const _convTemp = (date, timeZone = 'UTC') => {
 }
 
 export function getSeconds(date, timeZone) {
-  return _convTemp(date, timezone).second;
+  return _convTemp(date, timeZone).second;
 }
 
 export function getMinutes(date, timeZone) {
-  return _convTemp(date, timezone).minute;
+  return _convTemp(date, timeZone).minute;
 }
 
 export function getHours(date, timeZone) {
-  return _convTemp(date, timezone).hour;
+  return _convTemp(date, timeZone).hour;
 }
 
 export function getMonth(date, timeZone) {
-  return _convTemp(date, timezone).month;
+  return _convTemp(date, timeZone).month;
 }
 
 export function getYear(date, timeZone) {
-  return _convTemp(date, timezone).year;
+  return _convTemp(date, timeZone).year;
 }
 
 export function getDay(date, timeZone) {
-  return _convTemp(date, timezone).dayOfWeek;
+  return _convTemp(date, timeZone).dayOfWeek;
 }
 
 export function getDate(date, timeZone) {
-  return _convTemp(date, timezone).day;
+  return _convTemp(date, timeZone).day;
 }
 
 export function getTime(date, timeZone) {
-  return _convTemp(date, timezone).epochMilliseconds;
+  return _convTemp(date, timeZone).epochMilliseconds;
 }
 
-export function setMinutes(date, minutes, timezone) {
-  return new Date(_convTemp(date.setMinutes(minutes), timezone).epochMilliseconds);
+export function setMinutes(date, minutes, timeZone) {
+  return new Date(_convTemp(date.setMinutes(minutes), timeZone).epochMilliseconds);
 }
 
-export function setHours(date, hours, timezone) {
-  return new Date(_convTemp(date.setHours(hours), timezone).epochMilliseconds);
+export function setHours(date, hours, timeZone) {
+  return new Date(_convTemp(date.setHours(hours), timeZone).epochMilliseconds);
 }
 
-export function setMonth(date, month, timezone) {
-  return new Date(_convTemp(date.setMonth(month), timezone).epochMilliseconds);
+export function setMonth(date, month, timeZone) {
+  return new Date(_convTemp(date.setMonth(month), timeZone).epochMilliseconds);
 }
 
-export function setYear(date, year, timezone) {
-  return new Date(_convTemp(date.setYear(year), timezone).epochMilliseconds);
+export function setYear(date, year, timeZone) {
+  return new Date(_convTemp(date.setYear(year), timeZone).epochMilliseconds);
 }
 
 export { getQuarter, setQuarter, setSeconds };
 
-export function getWeek(date, timezone) {
-  return _convTemp(date, timezone).weekOfYear;
+export function getWeek(date, timeZone) {
+  return _convTemp(date, timeZone).weekOfYear;
 }
 
 export function getDayOfWeekCode(day, locale) {
@@ -250,8 +250,8 @@ export function getDayOfWeekCode(day, locale) {
 
 // *** Start of ***
 
-export function getStartOfDay(date, timezone) {
-  return new Date((new Temporal.ZonedDateTime((date.getTime()*1000000), timezone)).startOfDay().epochMilliseconds);
+export function getStartOfDay(date, timeZone) {
+  return new Date((new Temporal.ZonedDateTime((date.getTime()*1000000), timeZone)).startOfDay().epochMilliseconds);
 }
 
 export function getStartOfWeek(date, locale) {
