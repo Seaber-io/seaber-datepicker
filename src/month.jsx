@@ -137,7 +137,9 @@ export default class Month extends React.Component {
     );
     let i = 0;
     let breakAfterNextPush = false;
-
+      console.log('currentweekstart',currentWeekStart);
+      console.log('startofmonth',utils.getStartOfMonth(this.props.day))
+      console.log('this.props.day',this.props.day);
     while (true) {
       weeks.push(
         <Week

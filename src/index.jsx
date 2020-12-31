@@ -512,9 +512,9 @@ export default class DatePicker extends React.Component {
               !this.props.showTimeInput))
         ) {
           changedDate = setTime(changedDate, {
-            hour: getHours(this.props.selected),
-            minute: getMinutes(this.props.selected),
-            second: getSeconds(this.props.selected)
+            hour: getHours(this.props.selected, this.props.timeZone),
+            minute: getMinutes(this.props.selected, this.props.timeZone),
+            second: getSeconds(this.props.selected, this.props.timeZone)
           });
         }
         if (!this.props.inline) {
@@ -582,8 +582,8 @@ export default class DatePicker extends React.Component {
       ? this.props.selected
       : this.getPreSelection();
     let changedDate = setTime(selected, {
-      hour: getHours(time),
-      minute: getMinutes(time)
+      hour: getHours(time, this.props.timeZone),
+      minute: getMinutes(time, this.props.timeZone)
     });
 
     this.setState({

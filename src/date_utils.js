@@ -168,13 +168,13 @@ export function safeDateFormat(date, { dateFormat, locale }, timeZone) {
 
 // ** Date Setters **
 
-export function setTime(date, { hour = 0, minute = 0, second = 0, timeZone = 'UTC', day, year, month }) {
+export function setTime(date, { hour, minute, second, timeZone = 'UTC', day, year, month }) {
   day = (day) ? day : getDate(date, timeZone);
   month = (month) ? month : getMonth(date, timeZone);
   year = (year) ? year : getYear(date, timeZone);
   hour = (hour) ? hour : getHours(date, timeZone);
   minute = (minute) ? minute : getMinutes(date, timeZone);
-  second = (year) ? year : getYear(date, timeZone);
+  second = (second) ? second : 0;
   console.log(timeZone, year, month, day, hour, minute, second);
   return new Date(Temporal.ZonedDateTime.from({ timeZone, year, month, day, hour, minute, second }, { overflow: 'constrain' }).epochMilliseconds);
 }
@@ -248,20 +248,20 @@ export function getDayOfWeekCode(day, locale, timeZone) {
 // *** Start of ***
 
 export function getStartOfDay(date, timeZone) {
-  return new Date((new Temporal.ZonedDateTime(BigInt(date.getTime()*1000000), timeZone)).startOfDay().epochMilliseconds);
+  return _startOf(date, (d) => { return d.startOfDay() }, timeZone);
 }
 
 function _startOf(date, fn, timeZone) {
   const startDate = fn(date);
   const timeinfo = { 
     timeZone, 
-    year: startWeek.getFullYear(), 
-    month: startWeek.getMonth(), 
-    day: startWeek.getWeek(), 
-    hour: startWeek.getHours(), 
-    minute: startWeek.getMinutes(), 
+    year: startDate.getFullYear(), 
+    month: startDate.getMonth()+1, 
+    day: startDate.getDate(), 
+    hour: startDate.getHours(), 
+    minute: startDate.getMinutes(), 
   };
-  const zoned = new Temporal.ZonedDateTime.from(timeinfo);
+  const zoned = Temporal.ZonedDateTime.from(timeinfo);
   return new Date(zoned.epochMilliseconds);
 }
 
@@ -273,39 +273,49 @@ export function getStartOfWeek(date, locale, timeZone = 'UTC') {
   const timeinfo = { 
     timeZone, 
     year: startWeek.getFullYear(), 
-    month: startWeek.getMonth(), 
-    day: startWeek.getWeek(), 
+    month: startWeek.getMonth()+1, 
+    day: startWeek.getDate(), 
     hour: startWeek.getHours(), 
     minute: startWeek.getMinutes(), 
   };
-  const zoned = new Temporal.ZonedDateTime.from(timeinfo);
+  const zoned = Temporal.ZonedDateTime.from(timeinfo);
   return new Date(zoned.epochMilliseconds);
 }
 
-export function getStartOfMonth(date, timeZone) {
+export function getStartOfMonth(date, timeZone = 'UTC') {
   return _startOf(date, startOfMonth, timeZone);
 }
 
-export function getStartOfYear(date, timeZone) {
-  return _startOf(date, startOfYear(date), timeZone);
+export function getStartOfYear(date, timeZone = 'UTC') {
+  return _startOf(date, startOfYear, timeZone);
 }
 
-export function getStartOfQuarter(date, timeZone) {
-  return _startOf(date, startOfQuarter(date), timeZone);
+export function getStartOfQuarter(date, timeZone = 'UTC') {
+  return _startOf(date, startOfQuarter, timeZone);
 }
 
-export function getStartOfToday(timeZone) {
-  return _startOf(date, () => startOfDay(newDate()), timeZone);
+export function getStartOfToday(timeZone = 'UTC') {
+  const todayTemporal = Temporal.now.zonedDateTimeISO(timeZone);
+  const timeinfo = { 
+    timeZone, 
+    year: todayTemporal.year, 
+    month: todayTemporal.month+1, 
+    day: todayTemporal.day, 
+    hour: 0,
+    minute: 0,
+  };
+  const zonedToday = Temporal.ZonedDateTime.from(timeinfo);
+  return new Date(zonedToday.epochMilliseconds);
 }
 
 // *** End of ***
 
-export function getEndOfWeek(date, timeZone) {
+export function getEndOfWeek(date, timeZone = 'UTC') {
   return _startOf(date, endOfWeek, timeZone);
 }
 
 export function getEndOfMonth(date) {
-  return _startOf(date, endOfMonth, timeZone);
+  return _startOf(date, endOfMonth, timeZone = 'UTC');
 }
 
 // ** Date Math **
