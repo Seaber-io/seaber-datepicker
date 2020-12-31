@@ -41,6 +41,7 @@ export default class Month extends React.Component {
     selected: PropTypes.instanceOf(Date),
     selectingDate: PropTypes.instanceOf(Date),
     selectsEnd: PropTypes.bool,
+    timeZone: PropTypes.string,
     selectsStart: PropTypes.bool,
     selectsRange: PropTypes.bool,
     showWeekNumbers: PropTypes.bool,
@@ -155,6 +156,7 @@ export default class Month extends React.Component {
           maxDate={this.props.maxDate}
           excludeDates={this.props.excludeDates}
           includeDates={this.props.includeDates}
+          timeZone={this.props.timeZone}
           inline={this.props.inline}
           shouldFocusDayInline={this.props.shouldFocusDayInline}
           highlightDates={this.props.highlightDates}

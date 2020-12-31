@@ -36,6 +36,7 @@ export default class Day extends React.Component {
     selectingDate: PropTypes.instanceOf(Date),
     selectsEnd: PropTypes.bool,
     selectsStart: PropTypes.bool,
+    timeZone: PropTypes.string,
     selectsRange: PropTypes.bool,
     startDate: PropTypes.instanceOf(Date),
     renderDayContents: PropTypes.func,
@@ -221,7 +222,7 @@ export default class Day extends React.Component {
     return classnames(
       "react-datepicker__day",
       dayClassName,
-      "react-datepicker__day--" + getDayOfWeekCode(this.props.day),
+      "react-datepicker__day--" + getDayOfWeekCode(this.props.day, undefined, this.props.timeZone),
       {
         "react-datepicker__day--disabled": this.isDisabled(),
         "react-datepicker__day--excluded": this.isExcluded(),

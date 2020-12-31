@@ -98,6 +98,7 @@ export default class DatePicker extends React.Component {
       strictParsing: false,
       timeIntervals: 30,
       timeCaption: "Time",
+      timeZone: 'UTC',
       previousMonthButtonLabel: "Previous Month",
       nextMonthButtonLabel: "Next Month",
       previousYearButtonLabel: "Previous Year",

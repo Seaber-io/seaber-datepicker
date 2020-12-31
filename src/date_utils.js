@@ -56,19 +56,12 @@ var longFormattingTokensRegExp = /P+p+|P+|p+|''|'(''|[^'])+('|$)|./g;
 
 // ** Date Constructors **
 
-function _parseISO(value, timeZone = 'UTC') {
- return new Date( Temporal.Instant.from(parseISO(value)).toZonedDateTimeISO(timeZone).epochMilliseconds )
-}
-
-function _toDate(value, timeZone = 'UTC') {
-  return new Date( Temporal.Instant.from(toDate(value)).toZonedDateTimeISO(timeZone).epochMilliseconds )
-}
 
 export function newDate(value, timeZone = 'UTC') {
   const d = value
     ? typeof value === "string" || value instanceof String
-      ? _parseISO(value, timeZone = 'UTC')
-      : _toDate(value, timeZone = 'UTC')
+      ? parseISO(value, timeZone = 'UTC')
+      : toDate(value, timeZone = 'UTC')
     : new Date();
   return isValid(d) ? d : null;
 }
@@ -89,7 +82,7 @@ export function parseDate(value, dateFormat, locale, strictParsing, timeZone = '
         parsedDate = tryParseDate;
       }
     });
-    return new Date(Temporal.ZonedDateTime((parsedDate.getTime*1000000), timeZone).epochMilliseconds);
+    return parsedDate;
   }
 
   parsedDate = parse(value, dateFormat, new Date(), { locale: localeObject });
@@ -122,7 +115,7 @@ export function parseDate(value, dateFormat, locale, strictParsing, timeZone = '
     }
   }
 
-  return isValid(parsedDate) && strictParsingValueMatch ? new Date(Temporal.ZonedDateTime((parsedDate.getTime*1000000), timeZone).epochMilliseconds) : null;
+  return isValid(parsedDate) && strictParsingValueMatch ? parsedDate : null;
 }
 
 // ** Date "Reflection" **
@@ -161,13 +154,13 @@ export function formatDate(date, formatStr, locale, timeZone) {
   });
 }
 
-export function safeDateFormat(date, { dateFormat, locale }) {
+export function safeDateFormat(date, { dateFormat, locale }, timeZone) {
   return (
     (date &&
       formatDate(
         date,
         Array.isArray(dateFormat) ? dateFormat[0] : dateFormat,
-        (locale)
+        (locale), timeZone
       )) ||
     ""
   );
@@ -176,10 +169,14 @@ export function safeDateFormat(date, { dateFormat, locale }) {
 // ** Date Setters **
 
 export function setTime(date, { hour = 0, minute = 0, second = 0, timeZone = 'UTC', day, year, month }) {
-  day = (day) ? day : getDay(date, timeZone);
+  day = (day) ? day : getDate(date, timeZone);
   month = (month) ? month : getMonth(date, timeZone);
   year = (year) ? year : getYear(date, timeZone);
-  return Temporal.ZonedDateTime.from({ timeZone, year, month, day, hour, minute, second }, { overflow: 'constrain' });
+  hour = (hour) ? hour : getHours(date, timeZone);
+  minute = (minute) ? minute : getMinutes(date, timeZone);
+  second = (year) ? year : getYear(date, timeZone);
+  console.log(timeZone, year, month, day, hour, minute, second);
+  return new Date(Temporal.ZonedDateTime.from({ timeZone, year, month, day, hour, minute, second }, { overflow: 'constrain' }).epochMilliseconds);
 }
 
 
@@ -187,7 +184,7 @@ export function setTime(date, { hour = 0, minute = 0, second = 0, timeZone = 'UT
 
 
 const _convTemp = (date, timeZone = 'UTC') => {
-  return new Temporal.ZonedDateTime((date.getTime()*1000000), timeZone)
+  return new Temporal.ZonedDateTime(BigInt(date.getTime()*1000000), timeZone)
 }
 
 export function getSeconds(date, timeZone) {
@@ -244,47 +241,71 @@ export function getWeek(date, timeZone) {
   return _convTemp(date, timeZone).weekOfYear;
 }
 
-export function getDayOfWeekCode(day, locale) {
-  return formatDate(day, "ddd", (locale));
+export function getDayOfWeekCode(day, locale, timeZone) {
+  return formatDate(day, "ddd", (locale), timeZone);
 }
 
 // *** Start of ***
 
 export function getStartOfDay(date, timeZone) {
-  return new Date((new Temporal.ZonedDateTime((date.getTime()*1000000), timeZone)).startOfDay().epochMilliseconds);
+  return new Date((new Temporal.ZonedDateTime(BigInt(date.getTime()*1000000), timeZone)).startOfDay().epochMilliseconds);
 }
 
-export function getStartOfWeek(date, locale) {
+function _startOf(date, fn, timeZone) {
+  const startDate = fn(date);
+  const timeinfo = { 
+    timeZone, 
+    year: startWeek.getFullYear(), 
+    month: startWeek.getMonth(), 
+    day: startWeek.getWeek(), 
+    hour: startWeek.getHours(), 
+    minute: startWeek.getMinutes(), 
+  };
+  const zoned = new Temporal.ZonedDateTime.from(timeinfo);
+  return new Date(zoned.epochMilliseconds);
+}
+
+export function getStartOfWeek(date, locale, timeZone = 'UTC') {
   let localeObj = locale
     ? getLocaleObject(locale)
     : getLocaleObject(getDefaultLocale());
-  return startOfWeek(date, { locale: localeObj });
+  const startWeek = startOfWeek(date, { locale: localeObj });
+  const timeinfo = { 
+    timeZone, 
+    year: startWeek.getFullYear(), 
+    month: startWeek.getMonth(), 
+    day: startWeek.getWeek(), 
+    hour: startWeek.getHours(), 
+    minute: startWeek.getMinutes(), 
+  };
+  const zoned = new Temporal.ZonedDateTime.from(timeinfo);
+  return new Date(zoned.epochMilliseconds);
 }
 
-export function getStartOfMonth(date) {
-  return startOfMonth(date);
+export function getStartOfMonth(date, timeZone) {
+  return _startOf(date, startOfMonth, timeZone);
 }
 
-export function getStartOfYear(date) {
-  return startOfYear(date);
+export function getStartOfYear(date, timeZone) {
+  return _startOf(date, startOfYear(date), timeZone);
 }
 
-export function getStartOfQuarter(date) {
-  return startOfQuarter(date);
+export function getStartOfQuarter(date, timeZone) {
+  return _startOf(date, startOfQuarter(date), timeZone);
 }
 
-export function getStartOfToday() {
-  return startOfDay(newDate());
+export function getStartOfToday(timeZone) {
+  return _startOf(date, () => startOfDay(newDate()), timeZone);
 }
 
 // *** End of ***
 
-export function getEndOfWeek(date) {
-  return endOfWeek(date);
+export function getEndOfWeek(date, timeZone) {
+  return _startOf(date, endOfWeek, timeZone);
 }
 
 export function getEndOfMonth(date) {
-  return endOfMonth(date);
+  return _startOf(date, endOfMonth, timeZone);
 }
 
 // ** Date Math **
@@ -394,28 +415,28 @@ export function getLocaleObject(localeSpec) {
   }
 }
 
-export function getFormattedWeekdayInLocale(date, formatFunc, locale) {
-  return formatFunc(formatDate(date, "EEEE", locale));
+export function getFormattedWeekdayInLocale(date, formatFunc, locale, timeZone) {
+  return formatFunc(formatDate(date, "EEEE", locale, timeZone));
 }
 
-export function getWeekdayMinInLocale(date, locale) {
-  return formatDate(date, "EEEEEE", locale);
+export function getWeekdayMinInLocale(date, locale, timeZone) {
+  return formatDate(date, "EEEEEE", locale, timeZone);
 }
 
-export function getWeekdayShortInLocale(date, locale) {
-  return formatDate(date, "EEE", locale);
+export function getWeekdayShortInLocale(date, locale, timeZone) {
+  return formatDate(date, "EEE", locale, timeZone);
 }
 
-export function getMonthInLocale(month, locale) {
-  return formatDate(setMonth(newDate(), month), "LLLL", locale);
+export function getMonthInLocale(month, locale, timeZone) {
+  return formatDate(setMonth(newDate(), month), "LLLL", locale, timeZone);
 }
 
-export function getMonthShortInLocale(month, locale) {
-  return formatDate(setMonth(newDate(), month), "LLL", locale);
+export function getMonthShortInLocale(month, locale, timeZone) {
+  return formatDate(setMonth(newDate(), month), "LLL", locale, timeZone);
 }
 
-export function getQuarterShortInLocale(quarter, locale) {
-  return formatDate(setQuarter(newDate(), quarter), "QQQ", locale);
+export function getQuarterShortInLocale(quarter, locale, timeZone) {
+  return formatDate(setQuarter(newDate(), quarter), "QQQ", locale, timeZone);
 }
 
 // ** Utils for some components **
@@ -645,18 +666,19 @@ export function getEffectiveMaxDate({ maxDate, includeDates }) {
     return max(includeDates);
   } else {
     return maxDate;
-  }
+  } 
 }
 
 export function getHightLightDaysMap(
   highlightDates = [],
-  defaultClassName = "react-datepicker__day--highlighted"
+  defaultClassName = "react-datepicker__day--highlighted",
+  timeZone
 ) {
   const dateClasses = new Map();
   for (let i = 0, len = highlightDates.length; i < len; i++) {
     const obj = highlightDates[i];
     if (isDate(obj)) {
-      const key = formatDate(obj, "MM.dd.yyyy");
+      const key = formatDate(obj, "MM.dd.yyyy", 'en', timeZone);
       const classNamesArr = dateClasses.get(key) || [];
       if (!classNamesArr.includes(defaultClassName)) {
         classNamesArr.push(defaultClassName);
@@ -668,7 +690,7 @@ export function getHightLightDaysMap(
       const arrOfDates = obj[keys[0]];
       if (typeof className === "string" && arrOfDates.constructor === Array) {
         for (let k = 0, len = arrOfDates.length; k < len; k++) {
-          const key = formatDate(arrOfDates[k], "MM.dd.yyyy");
+          const key = formatDate(arrOfDates[k], "MM.dd.yyyy", 'en', timeZone);
           const classNamesArr = dateClasses.get(key) || [];
           if (!classNamesArr.includes(className)) {
             classNamesArr.push(className);

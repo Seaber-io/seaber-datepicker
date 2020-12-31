@@ -20,6 +20,7 @@ export default class Week extends React.Component {
     endDate: PropTypes.instanceOf(Date),
     excludeDates: PropTypes.array,
     filterDate: PropTypes.func,
+    timeZone: PropTypes.string,
     formatWeekNumber: PropTypes.func,
     highlightDates: PropTypes.instanceOf(Map),
     includeDates: PropTypes.array,
@@ -121,6 +122,7 @@ export default class Week extends React.Component {
             selectingDate={this.props.selectingDate}
             filterDate={this.props.filterDate}
             preSelection={this.props.preSelection}
+            timeZone={this.props.timeZone}
             selected={this.props.selected}
             selectsStart={this.props.selectsStart}
             selectsEnd={this.props.selectsEnd}

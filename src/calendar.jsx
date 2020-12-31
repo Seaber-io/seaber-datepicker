@@ -924,6 +924,7 @@ export default class Calendar extends React.Component {
           })}
           showPopperArrow={this.props.showPopperArrow}
           arrowProps={this.props.arrowProps}
+          timeZone={this.props.timeZone}
         >
           {this.renderPreviousButton()}
           {this.renderNextButton()}
