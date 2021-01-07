@@ -57,11 +57,11 @@ var longFormattingTokensRegExp = /P+p+|P+|p+|''|'(''|[^'])+('|$)|./g;
 // ** Date Constructors **
 
 
-export function newDate(value, timeZone = 'UTC') {
+export function newDate(value) {
   const d = value
     ? typeof value === "string" || value instanceof String
-      ? parseISO(value, timeZone = 'UTC')
-      : toDate(value, timeZone = 'UTC')
+      ? parseISO(value)
+      : toDate(value)
     : new Date();
   return isValid(d) ? d : null;
 }
@@ -169,13 +169,12 @@ export function safeDateFormat(date, { dateFormat, locale }, timeZone) {
 // ** Date Setters **
 
 export function setTime(date, { hour, minute, second, timeZone = 'UTC', day, year, month }) {
-  day = (day) ? day : getDate(date, timeZone);
-  month = (month) ? month : getMonth(date, timeZone);
-  year = (year) ? year : getYear(date, timeZone);
-  hour = (hour) ? hour : getHours(date, timeZone);
-  minute = (minute) ? minute : getMinutes(date, timeZone);
-  second = (second) ? second : 0;
-  console.log(timeZone, year, month, day, hour, minute, second);
+  day = (!isNaN(day)) ? day : date.getDate();
+  month = (!isNaN(month)) ? month : (date.getMonth()+1);
+  year = (!isNaN(year)) ? year : date.getFullYear();
+  hour = (!isNaN(hour)) ? hour : getHours(date, timeZone);
+  minute = (!isNaN(minute)) ? minute : getMinutes(date, timeZone);
+  second = (!isNaN(second)) ? second : 0;
   return new Date(Temporal.ZonedDateTime.from({ timeZone, year, month, day, hour, minute, second }, { overflow: 'constrain' }).epochMilliseconds);
 }
 

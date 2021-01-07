@@ -33,7 +33,8 @@ import {
   registerLocale,
   setDefaultLocale,
   getDefaultLocale,
-  DEFAULT_YEAR_ITEM_NUMBER
+  DEFAULT_YEAR_ITEM_NUMBER,
+  getDate
 } from "./date_utils";
 import onClickOutside from "react-onclickoutside";
 
@@ -127,7 +128,7 @@ export default class DatePicker extends React.Component {
     ariaRequired: PropTypes.string,
     autoComplete: PropTypes.string,
     autoFocus: PropTypes.bool,
-    timeZone: ProprTypes.string,
+    timeZone: PropTypes.string,
     calendarClassName: PropTypes.string,
     calendarContainer: PropTypes.func,
     children: PropTypes.node,
@@ -514,7 +515,8 @@ export default class DatePicker extends React.Component {
           changedDate = setTime(changedDate, {
             hour: getHours(this.props.selected, this.props.timeZone),
             minute: getMinutes(this.props.selected, this.props.timeZone),
-            second: getSeconds(this.props.selected, this.props.timeZone)
+            second: getSeconds(this.props.selected, this.props.timeZone),
+            timeZone: this.props.timeZone,
           });
         }
         if (!this.props.inline) {
@@ -583,7 +585,8 @@ export default class DatePicker extends React.Component {
       : this.getPreSelection();
     let changedDate = setTime(selected, {
       hour: getHours(time, this.props.timeZone),
-      minute: getMinutes(time, this.props.timeZone)
+      minute: getMinutes(time, this.props.timeZone),
+      timeZone: this.props.timeZone,
     });
 
     this.setState({
