@@ -18,6 +18,7 @@ import {
 } from "./date_utils";
 import { Temporal } from "proposal-temporal";
 
+
 export default class Day extends React.Component {
   static propTypes = {
     ariaLabelPrefixWhenEnabled: PropTypes.string,
@@ -83,11 +84,8 @@ export default class Day extends React.Component {
   };
 
   isSameDay = other => isSameDay(this.props.day, other);
-  isSameRealDay = (other, timeZone = 'UTC') => {
-    const thisDay = new Temporal.ZonedDateTime(BigInt(this.props.day.getTime() * 1000000), timeZone);
-    const otherDay = new Temporal.ZonedDateTime(BigInt(other.getTime()*1000000), timeZone);
-    return (thisDay.day === otherDay.day && thisDay.month === otherDay.month && thisDay.year === otherDay.year) ? true : false;
-  }
+
+  
   isKeyboardSelected = () =>
     !this.props.disabledKeyboardNavigation &&
     !this.isSameDay(this.props.selected) &&
@@ -231,7 +229,7 @@ export default class Day extends React.Component {
       {
         "react-datepicker__day--disabled": this.isDisabled(),
         "react-datepicker__day--excluded": this.isExcluded(),
-        "react-datepicker__day--selected": this.isSameRealDay(this.props.selected, this.props.timeZone),
+        "react-datepicker__day--selected": this.isSameDay(this.props.selected),
         "react-datepicker__day--keyboard-selected": this.isKeyboardSelected(),
         "react-datepicker__day--range-start": this.isRangeStart(),
         "react-datepicker__day--range-end": this.isRangeEnd(),

@@ -178,12 +178,55 @@ export function setTime(date, { hour, minute, second, timeZone = 'UTC', day, yea
   return new Date(Temporal.ZonedDateTime.from({ timeZone, year, month, day, hour, minute, second }, { overflow: 'constrain' }).epochMilliseconds);
 }
 
+export class _cache {
+
+  static time = new Map();
+  static zone = new Map(); 
+  
+  static getTime(v) {
+    return this.time.get(v)
+  }
+
+  static getZone(v) { 
+    return this.zone.get(v)
+  }
+
+  static setTime(v, vv) {
+    return this.time.set(v, vv);
+  }
+
+  static setZone(v, vv) {
+    return this.zone.set(v, vv);
+  }
+
+}
 
 // ** Date Getters **
 
-
 const _convTemp = (date, timeZone = 'UTC') => {
-  return new Temporal.ZonedDateTime(BigInt(date.getTime()*1000000), timeZone)
+
+  var _date, _timeZone;
+  
+  _timeZone = _cache.getZone(timeZone);
+
+  if (!_timeZone) {
+    _timeZone = new Temporal.TimeZone(timeZone);
+    _cache.setZone(timeZone, _timeZone);
+  } 
+
+  _date = _cache.getTime([date, timeZone]);
+
+  if (!_date) {
+    if (date === 'today') {
+      const now = new Temporal.now.plainDateISO(_timeZone).with({ hour: 0, minute: 0 });
+      _date = new Temporal.ZonedDateTime.from(now);
+    } else {
+      _date = new Temporal.ZonedDateTime(BigInt(date.getTime()*1000000), _timeZone);
+    }
+    _cache.setTime([date, timeZone], _date);
+  }
+
+  return _date;
 }
 
 export function getSeconds(date, timeZone) {
@@ -214,24 +257,64 @@ export function getDate(date, timeZone) {
   return _convTemp(date, timeZone).day;
 }
 
-export function getTime(date, timeZone) {
-  return _convTemp(date, timeZone).epochMilliseconds;
+export function getTime(date) {
+  return date.getTime();
 }
 
 export function setMinutes(date, minutes, timeZone) {
-  return new Date(_convTemp(date.setMinutes(minutes), timeZone).epochMilliseconds);
+  var zoned = _convTemp(date, timeZone);
+  const timeinfo = { 
+    timeZone, 
+    year: zoned.year, 
+    month: zoned.month, 
+    day: zoned.day, 
+    hour: zoned.hour, 
+    minute: minutes, 
+  };
+  zoned = Temporal.ZonedDateTime.from(timeinfo);
+  return new Date(zoned.epochMilliseconds);
 }
 
 export function setHours(date, hours, timeZone) {
-  return new Date(_convTemp(date.setHours(hours), timeZone).epochMilliseconds);
+  var zoned = _convTemp(date, timeZone);
+  const timeinfo = { 
+    timeZone, 
+    year: zoned.year, 
+    month: zoned.month, 
+    day: zoned.day, 
+    hour: hours, 
+    minute: zoned.minute, 
+  };
+  zoned = Temporal.ZonedDateTime.from(timeinfo);
+  return new Date(zoned.epochMilliseconds);
 }
 
 export function setMonth(date, month, timeZone) {
-  return new Date(_convTemp(date.setMonth(month), timeZone).epochMilliseconds);
+  var zoned = _convTemp(date, timeZone);
+  const timeinfo = { 
+    timeZone, 
+    year: zoned.year, 
+    month: month, 
+    day: zoned.day, 
+    hour: zoned.hour, 
+    minute: zoned.minute, 
+  };
+  zoned = Temporal.ZonedDateTime.from(timeinfo);
+  return new Date(zoned.epochMilliseconds);
 }
 
 export function setYear(date, year, timeZone) {
-  return new Date(_convTemp(date.setYear(year), timeZone).epochMilliseconds);
+  var zoned = _convTemp(date, timeZone);
+  const timeinfo = { 
+    timeZone, 
+    year: year, 
+    month: zoned.month, 
+    day: zoned.day, 
+    hour: zoned.hour, 
+    minute: zoned.minute, 
+  };
+  zoned = Temporal.ZonedDateTime.from(timeinfo);
+  return new Date(zoned.epochMilliseconds);
 }
 
 export { getQuarter, setQuarter, setSeconds };
@@ -294,16 +377,7 @@ export function getStartOfQuarter(date, timeZone = 'UTC') {
 }
 
 export function getStartOfToday(timeZone = 'UTC') {
-  const todayTemporal = Temporal.now.zonedDateTimeISO(timeZone);
-  const timeinfo = { 
-    timeZone, 
-    year: todayTemporal.year, 
-    month: todayTemporal.month+1, 
-    day: todayTemporal.day, 
-    hour: 0,
-    minute: 0,
-  };
-  const zonedToday = Temporal.ZonedDateTime.from(timeinfo);
+  var todayTemporal = _convTemp('today', timeZone);
   return new Date(zonedToday.epochMilliseconds);
 }
 
